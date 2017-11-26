@@ -1,0 +1,61 @@
+.navbar-fixed
+	nav
+		.container
+			.nav-wrapper
+				a.brand-logo(href='/') sASAP.com
+				ul.right.hide-on-med-and-down
+					li
+						a(onclick="spinner()" href='/') Home
+					li
+						a(onclick="spinner()" href='/department') Department
+					//- li
+					//- 	a(onclick="spinner()" href="/aisle") Aisle
+					// Dropdown Trigger
+					li
+						a(onclick="spinner()" href="/products") Products
+					// Dropdown Trigger
+					li
+						a.dropdown-button(href='#!', data-activates='dropdown1')
+							| Account
+							i.material-icons.right arrow_drop_down
+	ul#dropdown1.dropdown-content
+		li
+			a(onclick="spinner()" href="login") login
+		li
+			a(href='#!') user
+		li.divider
+		li
+			a(href='/logout') logout
+	//- nav.navbar.navbar-toggleable-md.navbar-light.bg-faded.fixed-top.main-nav
+	//-   .container
+	//-     button.navbar-toggler.navbar-toggler-right(type='button', data-toggle='collapse', data-target='#navbarSupportedContent', aria-controls='navbarSupportedContent', aria-expanded='false', aria-label='Toggle navigation')
+	//-       span.navbar-toggler-icon
+	//-     a.navbar-brand(href='/')
+	//-       i.fa.fa-home(aria-hidden="true") 
+	//-         span uRGy
+	//-     #navbarSupportedContent.collapse.navbar-collapse
+	//-       ul.navbar-nav.mr-auto
+	//-         li.nav-item(class=(title == 'Home')  ? 'active' : undefined)
+	//-           a.nav-link(href='/') Home
+	//-         li.nav-item
+	//-           a.nav-link(href='/department') Departments
+	//-         li.nav-item
+	//-           a.nav-link(href='/admin/advertise') Store Adverts
+	//-         li.nav-item
+	//-           a.nav-link(href='/admin/youtube') Youtube
+	//-         li.nav-item
+	//-           a.nav-link(href='/admin/orders') Orders
+	//-         li.nav-item
+	//-           a.nav-link(href='/admin/customers') Customers
+	//-         li.nav-item
+	//-           a.nav-link(href='#') Contacts
+	//-       form.form-inline.my-2.my-lg-0
+	//-         - if(currentUser)
+	//-           li.nav-item(style="list-style:none")
+	//-             i.fa.fa-user(aria-hidden="true", style="font-size:20px; padding-right:5px;" ) 
+	//-             span #{currentUser.username}
+	//-           li.nav-item(style="list-style:none;")
+	//-         - if(!currentUser)
+	//-           a.nav-link(href="/login", style="color:#ffc900 !important;") Login
+	//-         -else
+	//-           a.nav-link(href="/logout", style="color:#ffc900 !important;") Log Out

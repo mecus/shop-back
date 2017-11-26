@@ -1,0 +1,114 @@
+// @import "themes/default/variables";
+
+// @import "lib/bootstrap/bootstrap";
+// @import "lib/font-awesome/font-awesome";
+
+// @import "themes/default/default";
+@import "department";
+@import "aisle";
+@import "category";
+@import "product";
+
+// Scaffolding
+// -------------------------
+// Page Load Progress
+#pageLoad{
+  display: none;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  height: 100vh;
+  background-color: rgba(0,0,0, 0.2);
+  margin: 0 auto;
+  z-index: 100;
+  .loader-spinner{
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 200px;
+    margin: 0 auto;
+    text-align: center;
+    margin-top: 20%;
+    margin-left: -100px;
+  }
+}
+.add-btn{
+  text-align: right;
+  margin-top: 20px;
+  button{
+    margin-left: 10px;
+  }
+}
+.container{
+  width: 90% !important;
+}
+html {
+  position: relative;
+  min-height: 100%;
+  
+}
+body {
+  margin: 0px;
+  padding: 0px;
+
+}
+.row, .col {
+  margin: 0px !important;
+  // padding: 0px !important;
+}
+footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 45px;
+  line-height: 45px;
+  background-color: lightgrey;
+
+  p, ul {
+    margin-bottom: 0;
+  }
+}
+
+// Input Fields
+// -------------------------
+
+textarea {
+  resize: vertical;
+}
+
+// Navbar
+// -------------------------
+nav{
+  margin: 0px;
+  background-color: #ffffff !important;
+  // height: 40px !important;
+  a{color: lightslategrey !important;}
+}
+// .navbar-nav img {
+//   width: 30px;
+//   height: 30px;
+//   margin: -15px 15px -15px;
+// }
+
+// // Alerts
+// // -------------------------
+
+// .alert {
+//   margin-top: 20px;
+// }
+
+// // Thumbnails
+// // -------------------------
+
+// .thumbnail {
+//   padding: 0;
+//   border-radius: 0;
+//   box-shadow: 0 0 5px #ccc, inset 0 0 0 #000;
+// }
+
+// // Font Icons
+// // -------------------------
+
+// .fa {
+//   margin-right: 6px;
+// }
