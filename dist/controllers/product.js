@@ -32,18 +32,20 @@ exports.getProducts = (req, res, next) => {
     }
 };
 exports.newProduct = (req, res, next) => {
-    const query = req.query;
-    if (query) {
+    const id = req.params.id;
+    if (id) {
         try {
-            const catColl = catRef.where("aisle_id", "==", query.aisle_id);
-            catColl.onSnapshot(snapshot => {
-                const data = snapshot.docs;
+            const catColl = catRef.doc(id).get();
+            catColl.then(snapshot => {
+                const data = snapshot.data();
                 if (data) {
-                    res.render("store/products/new", { query, data, brands, title: "New Product" });
+                    res.render("store/products/new", { cat_id: id, data, brands, title: "New Product" });
                 }
                 else {
-                    res.render("store/products/new", { query, brands, title: "New Product" });
+                    res.render("store/products/new", { cat_id: id, brands, title: "New Product" });
                 }
+            }).catch(err => {
+                next(err);
             });
         }
         catch (err) {
@@ -82,7 +84,7 @@ exports.postProduct = (req, res, next) => {
         code: req.body.code,
         price: prodPrice,
         old_price: prodOldPrice,
-        imageUrl: req.body.imageUrl,
+        imageUrl: "product.jpg",
         category: req.body.category,
         department_id: req.body.department_id,
         category_id: req.body.category_id,
@@ -117,14 +119,24 @@ exports.postProduct = (req, res, next) => {
 // Edit Page Request
 exports.editProduct = (req, res) => {
     console.log(req.body);
+    const id = req.params.id;
+    const oneProd = productRef.doc(id);
+    oneProd.get().then(snapshot => {
+        const data = snapshot.data();
+        // console.log(data);
+        res.render("store/products/edit", { id, data, brands });
+    }).catch(err => {
+        console.log(err);
+    });
 };
 // Update Product
 exports.updateProduct = (req, res, next) => {
+    const id = req.body.id;
     if (!req.body) {
         return next();
     }
     if (req.body.public_id) {
-        const id = req.body.id;
+        // const id = req.body.id;
         const oneProd = productRef.doc(id);
         const photoId = req.body.public_id;
         const photolink = req.body.image_url;
@@ -138,8 +150,38 @@ exports.updateProduct = (req, res, next) => {
         return res.json({ id: id });
     }
     else {
-        console.log(req.body);
-        return res.json({ id: "id" });
+        const prodPrice = Number(req.body.price).toFixed(2);
+        const prodOldPrice = Number(req.body.old_price).toFixed(2);
+        const productUp = {
+            name: req.body.name,
+            code: req.body.code,
+            price: prodPrice,
+            old_price: prodOldPrice,
+            stock: req.body.stock,
+            brand: req.body.brand || "",
+            offer: req.body.offer || "no",
+            sponsored: req.body.sponsored || "no",
+            recommend: req.body.recommend || "no",
+            description: {
+                detail: req.body.detail,
+                size: req.body.size,
+                origin: req.body.origin
+            },
+            nutrition: {
+                energy: req.body.energy,
+                fat: req.body.fat,
+                saturates: req.body.saturates,
+                salt: req.body.salt
+            },
+            publish: req.body.publish || "off"
+        };
+        const oneProd = productRef.doc(id);
+        oneProd.update(productUp).then(ref => {
+            res.redirect("/products/show/" + req.body.id);
+        }).catch(err => {
+            // console.log(err);
+            next(err);
+        });
     }
 };
 // Delete Product
@@ -150,7 +192,11 @@ exports.deleteProduct = (req, res) => {
     // res.json({status: "Deleted", id: paramId});
     const thisProduct = productRef.doc(paramId);
     const removeProduct = () => __awaiter(this, void 0, void 0, function* () {
-        yield thisProduct.delete();
+        yield thisProduct.delete().then(ref => {
+            return ref;
+        }).catch(err => {
+            console.log(err);
+        });
         yield imageMag_1.RemoveImage(cloudId);
         res.status(201);
         return res.json({ status: "Deleted", id: paramId });

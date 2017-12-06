@@ -6,9 +6,9 @@ block content
 			.row
 				form.col.s12(method="POST", action="/products/new")
 					.row
-						input#department_id.validate(hidden type='text' value=query.department_id name="department_id")
-						input#category_id.validate(hidden type='text' value=query.category_id name="category_id")
-						input#aisle_id.validate(hidden type='text' value=query.aisle_id name="aisle_id")
+						input#department_id.validate(hidden type='text' value=data.department_id name="department_id")
+						input#category_id.validate(hidden type='text' value=cat_id name="category_id")
+						input#aisle_id.validate(hidden type='text' value=data.aisle_id name="aisle_id")
 						input#aisle_id.validate(hidden type='text' name="photo_id")
 					.row
 						.input-field.col.s6
@@ -18,26 +18,28 @@ block content
 							input#product_code.validate(type='text' name="code")
 							label(for='product_code') Product Code
 					.row
-						.input-field.col.s6
+						.input-field.col.s4
 							input#price.validate(type='text' name="price")
 							label(for='price') Price
-						.input-field.col.s6
+						.input-field.col.s4
 							input#old_price.validate(type='text' name="old_price")
 							label(for='old_price') Old Price
-					.row
-						.input-field.col.s6
+						.input-field.col.s4
 							input#stock.validate(type='text' name="stock")
 							label(for='stock') Stock
+					.row
+						//- .input-field.col.s6
+						//- 	input#stock.validate(type='text' name="stock")
+						//- 	label(for='stock') Stock
 
-						.input-field.col.s6
-							input#image_url.validate(type='text' name="imageUrl")
-							label(for='image_url') Image Url
+						//- .input-field.col.s6
+						//- 	input#image_url.validate(type='text' name="imageUrl")
+						//- 	label(for='image_url') Image Url
 					.row
 						.input-field.col.s6
 							select(name="category")
-								option(value='', disabled='', selected='') Choose Category
-								each cat in data
-									option(value=cat.data().name) #{cat.data().name}
+								//- option(value='', disabled='', selected='') Choose Category
+								option(value=data.name) #{data.name}
 								//- option(value='', disabled='', selected='') Choose Category
 								//- option(value='1') Option 1
 								//- option(value='2') Option 2

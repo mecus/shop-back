@@ -4,6 +4,29 @@ $(document).ready(function() {
   // $(".dropdown-button").dropdown();
 });
 
+let deptId = "";
+const butt = document.getElementById("but");
+if (butt) {
+  butt.style.display = "none";
+}
+$("#dept").change((e: Event) => {
+  // console.log(e.target["value"]);
+  butt.style.display = "block";
+  deptId = e.target["value"];
+});
+const gotoAisle = () => {
+  // console.log(deptId);
+  location.replace("/aisles/" + deptId);
+};
+const gotoCategory = () => {
+  // console.log(deptId);
+  location.replace("/categories/" + deptId);
+};
+const gotoNewProduct = () => {
+  // console.log(deptId);
+  location.replace("/product/new/" + deptId);
+};
+
 const deleteDept = (val) => {
   const alat = confirm("Are you sure");
   if (alat) {

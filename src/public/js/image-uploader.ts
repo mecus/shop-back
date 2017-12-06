@@ -51,11 +51,10 @@ $("#loadimage").change((e: any) => {
 
 // Uploading Image for the product
 const imgAlert = document.getElementById("imageAlert");
-
 $("#inputbox").change((e: any) => {
     const id = document.getElementById("prodId").innerText;
     console.log(e.target.files[0].size);
-    if (e.target["files"][0].size > 38500) {
+    if (e.target["files"][0].size > 958500) {
         console.log("Your file is too large");
         imgAlert.innerHTML = `<small>Image too large</small>`;
         return;
@@ -80,6 +79,46 @@ $("#inputbox").change((e: any) => {
             console.log(status);
             window.location.replace("/products/show/" + data.id);
         });
+    }).catch((err) => {
+        console.log(err);
+    });
+});
+
+// uploading Image for Adverts
+const formEl = document.getElementById("formInput");
+const prog = document.getElementById('show-progress');
+if (prog) {
+    prog.style.display = "none";
+}
+$("#adImage").change((e: any) => {
+    // console.log(e.target.files[0]);
+    const file = e.target.files[0];
+    const formData = new FormData();
+    formData.append('file', file, file.filename);
+    formData.append('upload_preset', CLOUDINARY_PRESET);
+    prog.style.display = "block";
+    axios({
+        url: CLOUDINARY_URL,
+        method: 'POST',
+        headers: {
+            'Content-type': 'application/x-www-form-urlencoded'
+        },
+        data: formData
+    }).then((res) => {
+        const ifile = document.getElementById('imageFile');
+        const inputUrl = document.createElement('input');
+        const inputPhoto = document.createElement('input');
+        inputUrl.setAttribute('name', 'url');
+        inputUrl.setAttribute('value', res.data.secure_url);
+        inputUrl.setAttribute('hidden', '');
+        inputPhoto.setAttribute('value', res.data.public_id);
+        inputPhoto.setAttribute('name', 'photo_id');
+        inputPhoto.setAttribute('hidden', '');
+        formEl.appendChild(inputUrl);
+        formEl.appendChild(inputPhoto);
+        console.log(res);
+        ifile.innerHTML = res.data.original_filename;
+        prog.style.display = "none";
     }).catch((err) => {
         console.log(err);
     });

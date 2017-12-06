@@ -1,0 +1,63 @@
+.main-container{
+    h1{
+        font-size: 1.5em;
+    }
+    .page-container{
+        display: flex;
+        flex-wrap: wrap;
+        -webkit-flex-wrap: wrap;
+        justify-content: space-between;
+        -webkit-justify-content: space-between;
+        // flex-direction: row;
+        // flex-flow: row;
+        margin: 0 auto;
+        .adv{
+        //    flex: 1;
+        width: 260px;
+        // margin: 5px;
+            .single-advert{
+                // background-color: red;
+                // margin: 5px;
+                .card-image{
+                    .deleteBtn{
+                        position: absolute;
+                        top: 0;
+                        right: 5px;
+                    }
+                    .card-title{
+                        background-color: rgba(0,0,0, 0.2);
+                    }
+                }
+            }
+        }
+    }
+    .advert-page{
+        #adImage{
+            width: 100px;
+            height: 40px;
+            overflow: hidden;
+        }
+    }
+    .noAdvert{
+        background-color: lightgray;
+        height: 40px;
+        padding-left: 10px;
+        width: 100%;
+        p{
+            font-size: 1em;
+            line-height: 40px;
+
+        }
+    }
+    .addButton{
+        text-align: left;
+        a{
+            text-align: left;
+            color: #ffffff !important;
+        }
+    }
+}
+.edit-container{
+    width: 600px;
+    margin: 0 auto;
+}

@@ -1,4 +1,15 @@
 extends ../../layout
 block content
 	.container
-		h1 Aisle
+		.form-container
+			h3 #{title}
+			form.col.s12
+				.row
+					.input-field.col.s4#allSelection
+						select#dept()
+							option(value="" selected disabled) Select Aisle
+							each aisle in data			
+								option(value=aisle.id) #{aisle.data().name}
+						label Aisle
+				.row(onclick="gotoCategory()")
+					a.waves-effect.waves-light.btn#but(onclick="spinner()") Next

@@ -18,6 +18,10 @@ const MongoStore = mongo(session);
  */
 dotenv.config({ path: ".env" });
 /**
+ * API keys and Passport configuration.
+ */
+const passportConfig = require("./config/passport");
+/**
  * Controllers (route handlers).
  */
 const homeController = require("./controllers/home");
@@ -29,10 +33,9 @@ const aisle_1 = require("./controllers/aisle");
 const category_1 = require("./controllers/category");
 const product_1 = require("./controllers/product");
 const selections_1 = require("./controllers/selections");
-/**
- * API keys and Passport configuration.
- */
-const passportConfig = require("./config/passport");
+const adverts_1 = require("./controllers/adverts");
+const orders_1 = require("./controllers/orders");
+const youtube_1 = require("./controllers/youtube");
 /**
  * Create Express server.
  */
@@ -111,13 +114,28 @@ app.post("/category", category_1.postCategory);
 app.delete("/category/:id", category_1.removeCategory);
 app.post("/upload", department_1.uploadImage);
 app.get("/products", product_1.getProducts);
-app.get("/products/new", product_1.newProduct);
-app.patch("/product/edit/:id", product_1.editProduct);
+app.get("/product/new/:id", product_1.newProduct);
+app.get("/product/edit/:id", product_1.editProduct);
 app.get("/products/show/:id", product_1.showProduct);
 app.post("/products/new", product_1.postProduct);
 app.post("/products/updates", product_1.updateProduct);
 app.post("/product/delete", product_1.deleteProduct);
+// Adverts Routes
+app.get("/adverts", adverts_1.getAdverts);
+app.post("/adverts", adverts_1.postAdvert);
+app.get("/adverts/:id", adverts_1.deleteAdvert);
+app.get("/edit_advert/:id", adverts_1.editAdvert);
+app.post("/update_advert", adverts_1.updateAdvert);
+// Making Selections for product insert
 app.get("/departments", selections_1.selectDepartment);
+app.get("/aisles/:id", selections_1.selectAisle);
+app.get("/categories/:id", selections_1.selectCategory);
+// Orders
+app.get("/orders", orders_1.getOrders);
+// Youtube Video
+app.get("/youtube", youtube_1.getYoutube);
+app.post("/youtube/add", youtube_1.postYoutube);
+app.get("/youtube/:id", youtube_1.deleteYoutube);
 app.get("/login", userController.getLogin);
 app.post("/login", userController.postLogin);
 app.get("/logout", userController.logout);
@@ -157,6 +175,13 @@ app.use((err, req, res, next) => {
     if (res.headersSent) {
         return next(err);
         // res.render('500', { title: "Something Went Terribly Wrong!", error: err.stack });
+    }
+    if (err.stack.includes("Endpoint read failed")) {
+        res.status(500);
+        return res.render('500', { title: "Database read failed" });
+    }
+    if (req.next) {
+        return next(err);
     }
     res.status(500);
     console.error("AppError", err.stack);

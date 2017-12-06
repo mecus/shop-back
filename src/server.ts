@@ -21,6 +21,11 @@ const MongoStore = mongo(session);
 dotenv.config({ path: ".env" });
 
 /**
+ * API keys and Passport configuration.
+ */
+import * as passportConfig from "./config/passport";
+
+/**
  * Controllers (route handlers).
  */
 import * as homeController from "./controllers/home";
@@ -31,12 +36,10 @@ import { getDepartment, postDepartment, removeDepartment, uploadImage } from "./
 import { getAisle, postAisle, removeAisle, getAsileJson } from "./controllers/aisle";
 import { getCategory, postCategory, removeCategory } from "./controllers/category";
 import { getProducts, postProduct, newProduct, editProduct, showProduct, deleteProduct, updateProduct } from "./controllers/product";
-import { selectDepartment } from "./controllers/selections";
-
-/**
- * API keys and Passport configuration.
- */
-import * as passportConfig from "./config/passport";
+import { selectDepartment, selectAisle, selectCategory } from "./controllers/selections";
+import { getAdverts, postAdvert, deleteAdvert, editAdvert, updateAdvert } from "./controllers/adverts";
+import { getOrders } from "./controllers/orders";
+import { getYoutube, postYoutube, deleteYoutube } from "./controllers/youtube";
 
 
 
@@ -56,8 +59,6 @@ const app = express();
 //   console.log("MongoDB connection error. Please make sure MongoDB is running.");
 //   process.exit();
 // });
-
-
 
 /**
  * Express configuration.
@@ -131,14 +132,32 @@ app.delete("/category/:id", removeCategory);
 app.post("/upload", uploadImage);
 
 app.get("/products", getProducts);
-app.get("/products/new", newProduct);
-app.patch("/product/edit/:id", editProduct);
+app.get("/product/new/:id", newProduct);
+app.get("/product/edit/:id", editProduct);
 app.get("/products/show/:id", showProduct);
 app.post("/products/new", postProduct);
 app.post("/products/updates", updateProduct);
 app.post("/product/delete", deleteProduct);
 
+// Adverts Routes
+app.get("/adverts", getAdverts);
+app.post("/adverts", postAdvert);
+app.get("/adverts/:id", deleteAdvert);
+app.get("/edit_advert/:id", editAdvert);
+app.post("/update_advert", updateAdvert);
+
+// Making Selections for product insert
 app.get("/departments", selectDepartment);
+app.get("/aisles/:id", selectAisle);
+app.get("/categories/:id", selectCategory);
+
+// Orders
+app.get("/orders", getOrders);
+
+// Youtube Video
+app.get("/youtube", getYoutube);
+app.post("/youtube/add", postYoutube);
+app.get("/youtube/:id", deleteYoutube);
 
 app.get("/login", userController.getLogin);
 app.post("/login", userController.postLogin);
@@ -183,8 +202,16 @@ app.use((err, req, res, next) => {
     return next(err);
     // res.render('500', { title: "Something Went Terribly Wrong!", error: err.stack });
   }
+  if (err.stack.includes("Endpoint read failed")) {
+    res.status(500);
+    return res.render('500', { title: "Database read failed"});
+  }
+  if (req.next) {
+    return next(err);
+  }
   res.status(500);
   console.error("AppError", err.stack);
+
   res.render('500', { title: "Something Went Terribly Wrong!", error: err.stack });
 });
 

@@ -2,7 +2,10 @@ extends ../../layout
 block content
 	.container
 		.product-show.card
+			a(href=`/product/edit/${id}`)
+				i.material-icons() edit
 			.d-flex.flex-row.justify-content-between
+
 				.p-2.d-flex.flex-column.product-content
 					.d-flex.irow
 						.p-2

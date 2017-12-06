@@ -7,9 +7,9 @@ block content
 					each val in data
 						li.collection-item.avatar
 							//- img.circle(src='/images/deli.jpg', alt='')
-							a(onclick="spinner()" href=`/products/new/?name=${val.data().name}&category_id=${val.id}&aisle_id=${val.data().aisle_id}&department_id=${val.data().department_id}`)
+							a(onclick="spinner()" href=`/product/new/${val.id}`)
 								i.material-icons.circle add
-							a.title(onclick="spinner()" href=`/products/new/?name=${val.data().name}&category_id=${val.id}&aisle_id=${val.data().aisle_id}&department_id=${val.data().department_id}`)
+							a.title(onclick="spinner()" href=`/product/new/${val.id}`)
 								= val.data().name
 							p
 								= val.data().group

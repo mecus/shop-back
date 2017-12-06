@@ -27,17 +27,19 @@ export const getProducts = (req: Request, res: Response, next: NextFunction) => 
     }
 };
 export const newProduct = (req: Request, res: Response, next: NextFunction) => {
-    const query = req.query;
-    if (query) {
+    const id = req.params.id;
+    if (id) {
         try {
-            const catColl = catRef.where("aisle_id", "==", query.aisle_id);
-            catColl.onSnapshot(snapshot => {
-                const data = snapshot.docs;
+            const catColl = catRef.doc(id).get();
+            catColl.then(snapshot => {
+                const data = snapshot.data();
                 if (data) {
-                    res.render("store/products/new", {query, data, brands, title: "New Product"});
+                    res.render("store/products/new", {cat_id: id, data, brands, title: "New Product"});
                 }else {
-                    res.render("store/products/new", {query, brands, title: "New Product"});
+                    res.render("store/products/new", {cat_id: id, brands, title: "New Product"});
                 }
+            }).catch(err => {
+                next(err);
             });
         }
         catch (err) {
@@ -74,7 +76,7 @@ export const postProduct = (req: Request, res: Response, next: NextFunction) => 
         code: req.body.code,
         price: prodPrice,
         old_price: prodOldPrice,
-        imageUrl: req.body.imageUrl,
+        imageUrl: "product.jpg",
         category: req.body.category,
         department_id: req.body.department_id,
         category_id: req.body.category_id,
@@ -110,13 +112,23 @@ export const postProduct = (req: Request, res: Response, next: NextFunction) => 
 // Edit Page Request
 export const editProduct = (req: Request, res: Response) => {
     console.log(req.body);
+    const id = req.params.id;
+    const oneProd = productRef.doc(id);
+    oneProd.get().then(snapshot => {
+        const data = snapshot.data();
+        // console.log(data);
+        res.render("store/products/edit", {id, data, brands});
+    }).catch(err => {
+        console.log(err);
+    });
 };
 
 // Update Product
 export const updateProduct = (req: Request, res: Response, next: NextFunction) => {
+    const id = req.body.id;
     if (!req.body) { return next(); }
     if (req.body.public_id) {
-        const id = req.body.id;
+        // const id = req.body.id;
         const oneProd = productRef.doc(id);
         const photoId = req.body.public_id;
         const photolink = req.body.image_url;
@@ -129,8 +141,38 @@ export const updateProduct = (req: Request, res: Response, next: NextFunction) =
         }
         return res.json({id: id});
     } else {
-        console.log(req.body);
-        return res.json({ id: "id" });
+        const prodPrice = Number(req.body.price).toFixed(2);
+        const prodOldPrice = Number(req.body.old_price).toFixed(2);
+        const productUp = {
+            name: req.body.name,
+            code: req.body.code,
+            price: prodPrice,
+            old_price: prodOldPrice,
+            stock: req.body.stock,
+            brand: req.body.brand || "",
+            offer: req.body.offer || "no",
+            sponsored: req.body.sponsored || "no",
+            recommend: req.body.recommend || "no",
+            description: {
+                detail: req.body.detail,
+                size: req.body.size,
+                origin: req.body.origin
+            },
+            nutrition: {
+                energy: req.body.energy,
+                fat: req.body.fat,
+                saturates: req.body.saturates,
+                salt: req.body.salt
+            },
+            publish: req.body.publish || "off"
+        };
+        const oneProd = productRef.doc(id);
+        oneProd.update(productUp).then(ref => {
+            res.redirect("/products/show/" + req.body.id);
+        }).catch(err => {
+            // console.log(err);
+            next(err);
+        });
     }
 };
 
@@ -142,7 +184,11 @@ export const deleteProduct = (req: Request, res: Response) => {
     // res.json({status: "Deleted", id: paramId});
     const thisProduct = productRef.doc(paramId);
     const removeProduct = async () => {
-        await thisProduct.delete();
+        await thisProduct.delete().then(ref => {
+            return ref;
+        }).catch(err => {
+            console.log(err);
+        });
         await RemoveImage(cloudId);
         res.status(201);
         return res.json({status: "Deleted", id: paramId});

@@ -1,0 +1,109 @@
+extends ../../layout
+block content
+	.container
+		p(style="text-align:center; margin-top: 20px;") #{title}
+		.form-container
+			.row
+				form.col.s12(method="POST", action="/products/updates")
+					//- .row
+					//- 	input#department_id.validate(hidden type='text' value=data.department_id name="department_id")
+					//- 	input#category_id.validate(hidden type='text' value=cat_id name="category_id")
+					//- 	input#aisle_id.validate(hidden type='text' value=data.aisle_id name="aisle_id")
+					input.validate(hidden type='text' value=id name="id")
+					.row
+						.input-field.col.s6
+							input#product_name.validate(type='text' value=data.name name="name")
+							label(for='product_name') Product Name
+						.input-field.col.s6
+							input#product_code.validate(type='text' value=data.code name="code")
+							label(for='product_code') Product Code
+					.row
+						.input-field.col.s6
+							input#price.validate(type='text' value=data.price name="price")
+							label(for='price') Price
+						.input-field.col.s6
+							input#old_price.validate(type='text' value=data.old_price name="old_price")
+							label(for='old_price') Old Price
+					.row
+						//- .input-field.col.s6
+						//- 	input#stock.validate(type='text' value=data.stock name="stock")
+						//- 	label(for='stock') Stock
+
+						//- .input-field.col.s6
+						//- 	input#image_url.validate(type='text' name="imageUrl")
+						//- 	label(for='image_url') Image Url
+					.row
+						.input-field.col.s6
+							input#stock.validate(type='text' value=data.stock name="stock")
+							label(for='stock') Stock
+						.input-field.col.s6
+							select(name="brand")
+								option(value='', disabled='', selected='') Choose brand
+								each brand in brands
+									//- option(value='', disabled='', selected='') Choose brand
+									option(value=brand) #{brand}
+									//- option(value='2') Option 2
+									//- option(value='3') Option 3
+							label Product Brands
+					.row
+						.input-field.col.s4
+							select(name="offer")
+								option(value='no', disabled='', selected='') Offer
+								option(value='yes') yes
+								option(value='no') no
+							label Product Offer
+						.input-field.col.s4
+							select(name="sponsored")
+								option(value='no', disabled='', selected='') Sponsored
+								option(value='yes') yes
+								option(value='no') no
+							label Product Sponsored
+						.input-field.col.s4
+							select(name="recommend")
+								option(value='no', disabled='', selected='') Reconmend
+								option(value='yes') yes
+								option(value='no') no
+							label Product Reconmend
+					.row
+						.col.s12.m6
+							.card
+								.card-content
+									.row
+										.input-field.col.s6
+											input#origin.validate(type='text' value=data.description.size name="size")
+											label(for='size') Size
+										.input-field.col.s6
+											input#origin.validate(type='text' value=data.description.origin name="origin")
+											label(for='origin') Origin
+									.row
+										.input-field.col.s12
+											textarea#textarea1.materialize-textarea(name="detail") #{data.description.detail}
+											label(for='textarea1') Product Details
+					.row
+						.col.s12.m6
+							.card
+								.card-content
+									.row
+										.input-field.col.s6
+											input#energy.validate(type='text' value=data.nutrition.energy name="energy")
+											label(for='energy') Energy
+										.input-field.col.s6
+											input#fat.validate(type='text' value=data.nutrition.fat name="fat")
+											label(for='fat') Fat
+									.row
+										.input-field.col.s6
+											input#saturates.validate(type='text' value=data.nutrition.saturates name="saturates")
+											label(for='saturates') Saturates
+										.input-field.col.s6
+											input#salt.validate(type='text' value=data.nutrition.salt name="salt")
+											label(for='salt') Salt
+					.row
+						.col.s12
+							.switch
+								label
+									| Unpublish
+									input(type='checkbox' name="publish")
+									span.lever
+									|       Publish
+					.row
+						button.waves-effect.waves-light.btn(onclick="spinner()" type='submit') Submit
