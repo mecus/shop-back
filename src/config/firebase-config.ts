@@ -5,10 +5,16 @@ const serviceAccount = require("../../firebase-adminsdk.json");
 
 export const firebase = admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
-    // databaseURL: "https://shop-5e89b.firebaseio.com",
+    databaseURL: "https://shop-5e89b.firebaseio.com"
     // databaseAuthVariableOverride: undefined
 });
 
+export const authenticate = (req, res, next) => {
+    if (!req.session || !req.session.uid) {
+        return res.redirect("/login");
+    }
+    next();
+};
 // const config = {
 //     apiKey: "AIzaSyC3PouxaTBLmR1R2YhHKTR9dldzLGhCXwA",
 //     authDomain: "shop-5e89b.firebaseapp.com",

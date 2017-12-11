@@ -11,4 +11,4 @@ export interface OrderSchema {
     delivery_method: String;
     status: String;
     ip_address: String;
-};
+}

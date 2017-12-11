@@ -28,3 +28,23 @@ const goBack = () => {
     window.history.back();
     return 0;
 };
+
+$(document).ready(() => {
+    const arrowUp = document.getElementById("home-arrow");
+    const todayDate = document.getElementById("tody");
+    const timeOut = () => {setTimeout(() => {
+            arrowUp.style.marginTop = "0px";
+            arrowUp.style.transition = "1s";
+            }, 500);
+        };
+    const timeInter = setInterval(() => {
+        arrowUp.style.marginTop = "10px";
+        arrowUp.style.transition = "1s";
+        timeOut();
+        const tdate = new Date();
+        todayDate.innerText = `${tdate}`;
+    }, 1000);
+    const clearInterVal = () => {
+        clearInterval(timeInter);
+    };
+});

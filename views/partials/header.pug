@@ -2,37 +2,49 @@
 	nav
 		.container
 			.nav-wrapper
-				a.brand-logo(href='/') laland.com
+				a.brand-logo(href='/dashboard') uRGy
 				ul.right.hide-on-med-and-down
-					li
-						a(onclick="spinner()" href='/') Home
-					li
-						a(onclick="spinner()" href='/department') Department
-					//- li
-					//- 	a(onclick="spinner()" href="/aisle") Aisle
-					li
-						a(onclick="spinner()" href="/orders") Orders
-		
-					li
-						a(onclick="spinner()" href="/products") Products
+					- if (general)
+						li
+							a(onclick="spinner()" href='/dashboard')
+								i.material-icons airplay
+						- if (editor)
+							li
+								a(onclick="spinner()" href='/users') Users
+						li
+							a(onclick="spinner()" href='/department') Store
+						//- li
+						//- 	a(onclick="spinner()" href="/aisle") Aisle
+						li
+							a(onclick="spinner()" href="/orders") Orders
+			
+						li
+							a(onclick="spinner()" href="/products") Products
 
-					li
-						a(onclick="spinner()" href="/adverts") Adverts
-					li
-						a(onclick="spinner()" href="/youtube") Youtube
-		
+						li
+							a(onclick="spinner()" href="/adverts") Adverts
+						li
+							a(onclick="spinner()" href="/youtube") Youtube
+			
 					li
 						a.dropdown-button(href='#!', data-activates='dropdown1')
-							| Account
-							i.material-icons.right arrow_drop_down
+							| #{user}
+							- if (!user)
+								i.material-icons person_pin
+							- else
+								i.material-icons.right arrow_drop_down
 	ul#dropdown1.dropdown-content
-		li
-			a(onclick="spinner()" href="login") login
-		li
-			a(href='#!') user
-		li.divider
-		li
-			a(href='/logout') logout
+		- if (!user)
+			li
+				a(onclick="spinner()" href="login") login
+		- else
+			li
+				a(href='#!') account
+			li.divider
+		
+			li(onclick="firebaseSignOut()")
+				a(onclick="spinner()") logout
+					i.material-icons power_settings_new
 	//- nav.navbar.navbar-toggleable-md.navbar-light.bg-faded.fixed-top.main-nav
 	//-   .container
 	//-     button.navbar-toggler.navbar-toggler-right(type='button', data-toggle='collapse', data-target='#navbarSupportedContent', aria-controls='navbarSupportedContent', aria-expanded='false', aria-label='Toggle navigation')

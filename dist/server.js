@@ -7,12 +7,12 @@ const bodyParser = require("body-parser");
 const logger = require("morgan");
 const lusca = require("lusca");
 const dotenv = require("dotenv");
-const mongo = require("connect-mongo");
 const flash = require("express-flash");
 const path = require("path");
 const passport = require("passport");
 const expressValidator = require("express-validator");
-const MongoStore = mongo(session);
+const FirebaseStore = require('connect-session-firebase')(session);
+// const MongoStore = mongo(session);
 /**
  * Load environment variables from .env file, where API keys and passwords are configured.
  */
@@ -21,6 +21,7 @@ dotenv.config({ path: ".env" });
  * API keys and Passport configuration.
  */
 const passportConfig = require("./config/passport");
+const firebase_config_1 = require("./config/firebase-config");
 /**
  * Controllers (route handlers).
  */
@@ -36,19 +37,7 @@ const selections_1 = require("./controllers/selections");
 const adverts_1 = require("./controllers/adverts");
 const orders_1 = require("./controllers/orders");
 const youtube_1 = require("./controllers/youtube");
-/**
- * Create Express server.
- */
 const app = express();
-/**
- * Connect to MongoDB.
- */
-// mongoose.Promise = global.Promise;
-// mongoose.connect(process.env.MONGODB_URI || process.env.MONGOLAB_URI);
-// mongoose.connection.on("error", () => {
-//   console.log("MongoDB connection error. Please make sure MongoDB is running.");
-//   process.exit();
-// });
 /**
  * Express configuration.
  */
@@ -71,72 +60,85 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(expressValidator());
 app.use(session({
-    resave: true,
-    saveUninitialized: true,
+    store: new FirebaseStore({
+        database: firebase_config_1.firebase.database()
+    }),
     secret: process.env.SESSION_SECRET,
+    resave: true,
+    saveUninitialized: true
 }));
-app.use(passport.initialize());
-app.use(passport.session());
+// app.use(passport.initialize());
+// app.use(passport.session());
 app.use(flash());
 app.use(lusca.xframe("SAMEORIGIN"));
 app.use(lusca.xssProtection(true));
-app.use((req, res, next) => {
-    // res.locals.user = req.user;
-    next();
-});
-app.use((req, res, next) => {
-    // After successful login, redirect back to the intended page
-    // if (!req.user &&
-    //     req.path !== "/login" &&
-    //     req.path !== "/signup" &&
-    //     !req.path.match(/^\/auth/) &&
-    //     !req.path.match(/\./)) {
-    //   req.session.returnTo = req.path;
-    // } else if (req.user &&
-    //     req.path == "/account") {
-    //   req.session.returnTo = req.path;
-    // }
-    next();
-});
+// app.use((req, res, next) => {
+//   // res.locals.user = req.user;
+//   console.log("Request Set:", req.session);
+//   next();
+// });
 app.use(express.static(path.join(__dirname, "public")));
 /**
  * Primary app routes.
  */
+app.use((req, res, next) => {
+    if (req.session.uid) {
+        res.locals.uid = req.session.uid;
+        res.locals.user = req.session.user;
+        res.locals.email = req.session.email;
+        res.locals.admin = req.session.admin;
+        res.locals.editor = req.session.editor;
+        res.locals.general = req.session.general;
+        next();
+    }
+    else {
+        next();
+    }
+});
+// app.get("/", (req, res, next) => {
+//  res.redirect("/login");
+// });
 app.get("/", homeController.index);
-app.get("/department", department_1.getDepartment);
-app.post("/department", department_1.postDepartment);
-app.delete("/department/:id", department_1.removeDepartment);
-app.get("/aisle/:id", aisle_1.getAisle);
-app.post("/aisle", aisle_1.postAisle);
-app.delete("/aisle/:id", aisle_1.removeAisle);
-app.get("/category/?", category_1.getCategory);
-app.post("/category", category_1.postCategory);
-app.delete("/category/:id", category_1.removeCategory);
-app.post("/upload", department_1.uploadImage);
-app.get("/products", product_1.getProducts);
-app.get("/product/new/:id", product_1.newProduct);
-app.get("/product/edit/:id", product_1.editProduct);
-app.get("/products/show/:id", product_1.showProduct);
-app.post("/products/new", product_1.postProduct);
-app.post("/products/updates", product_1.updateProduct);
-app.post("/product/delete", product_1.deleteProduct);
+app.get("/dashboard", firebase_config_1.authenticate, homeController.dashboard);
+app.get("/department", firebase_config_1.authenticate, department_1.getDepartment);
+app.post("/department", firebase_config_1.authenticate, department_1.postDepartment);
+app.delete("/department/:id", firebase_config_1.authenticate, department_1.removeDepartment);
+app.get("/aisle/:id", firebase_config_1.authenticate, aisle_1.getAisle);
+app.post("/aisle", firebase_config_1.authenticate, aisle_1.postAisle);
+app.delete("/aisle/:id", firebase_config_1.authenticate, aisle_1.removeAisle);
+app.get("/category/?", firebase_config_1.authenticate, category_1.getCategory);
+app.post("/category", firebase_config_1.authenticate, category_1.postCategory);
+app.delete("/category/:id", firebase_config_1.authenticate, category_1.removeCategory);
+app.post("/upload", firebase_config_1.authenticate, department_1.uploadImage);
+app.get("/products", firebase_config_1.authenticate, product_1.getProducts);
+app.get("/product/new/:id", firebase_config_1.authenticate, product_1.newProduct);
+app.get("/product/edit/:id", firebase_config_1.authenticate, product_1.editProduct);
+app.get("/products/show/:id", firebase_config_1.authenticate, product_1.showProduct);
+app.post("/products/new", firebase_config_1.authenticate, product_1.postProduct);
+app.post("/products/updates", firebase_config_1.authenticate, product_1.updateProduct);
+app.post("/product/delete", firebase_config_1.authenticate, product_1.deleteProduct);
 // Adverts Routes
-app.get("/adverts", adverts_1.getAdverts);
-app.post("/adverts", adverts_1.postAdvert);
-app.get("/adverts/:id", adverts_1.deleteAdvert);
-app.get("/edit_advert/:id", adverts_1.editAdvert);
-app.post("/update_advert", adverts_1.updateAdvert);
+app.get("/adverts", firebase_config_1.authenticate, adverts_1.getAdverts);
+app.post("/adverts", firebase_config_1.authenticate, adverts_1.postAdvert);
+app.get("/adverts/:id", firebase_config_1.authenticate, adverts_1.deleteAdvert);
+app.get("/edit_advert/:id", firebase_config_1.authenticate, adverts_1.editAdvert);
+app.post("/update_advert", firebase_config_1.authenticate, adverts_1.updateAdvert);
 // Making Selections for product insert
-app.get("/departments", selections_1.selectDepartment);
-app.get("/aisles/:id", selections_1.selectAisle);
-app.get("/categories/:id", selections_1.selectCategory);
+app.get("/departments", firebase_config_1.authenticate, selections_1.selectDepartment);
+app.get("/aisles/:id", firebase_config_1.authenticate, selections_1.selectAisle);
+app.get("/categories/:id", firebase_config_1.authenticate, selections_1.selectCategory);
 // Orders
-app.get("/orders", orders_1.getOrders);
+app.get("/orders", firebase_config_1.authenticate, orders_1.getOrders);
 // Youtube Video
-app.get("/youtube", youtube_1.getYoutube);
-app.post("/youtube/add", youtube_1.postYoutube);
-app.get("/youtube/:id", youtube_1.deleteYoutube);
-app.get("/login", userController.getLogin);
+app.get("/youtube", firebase_config_1.authenticate, youtube_1.getYoutube);
+app.post("/youtube/add", firebase_config_1.authenticate, youtube_1.postYoutube);
+app.get("/youtube/:id", firebase_config_1.authenticate, youtube_1.deleteYoutube);
+app.get("/login", (req, res, next) => {
+    if (req.session && req.session.uid) {
+        return res.redirect("/dashboard");
+    }
+    next();
+}, userController.getLogin);
 app.post("/login", userController.postLogin);
 app.get("/logout", userController.logout);
 app.get("/forgot", userController.getForgot);
@@ -145,6 +147,10 @@ app.get("/reset/:token", userController.getReset);
 app.post("/reset/:token", userController.postReset);
 app.get("/signup", userController.getSignup);
 app.post("/signup", userController.postSignup);
+app.get("/users", firebase_config_1.authenticate, userController.getAuthenticatedUsers);
+app.get("/deleteuser/:id", firebase_config_1.authenticate, userController.deleteAuthenticatedUsers);
+app.get("/updateuser/:id", firebase_config_1.authenticate, userController.getUpdateAuthenticatedUser);
+app.post("/updateuser", firebase_config_1.authenticate, userController.postUpdateAuthenticatedUser);
 app.get("/contact", contactController.getContact);
 app.post("/contact", contactController.postContact);
 app.get("/account", passportConfig.isAuthenticated, userController.getAccount);
@@ -156,6 +162,7 @@ app.get("/account/unlink/:provider", passportConfig.isAuthenticated, userControl
  * API examples routes.
  */
 app.get("/api/aisle", aisle_1.getAsileJson);
+app.get("/api/products", firebase_config_1.authenticate, product_1.getApiProducts);
 app.get("/api", apiController.getApi);
 app.get("/api/facebook", passportConfig.isAuthenticated, passportConfig.isAuthorized, apiController.getFacebook);
 /**

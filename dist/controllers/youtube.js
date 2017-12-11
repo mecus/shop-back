@@ -19,7 +19,6 @@ exports.getYoutube = (req, res, next) => {
     catch (err) {
         next(err);
     }
-    ;
 };
 exports.postYoutube = (req, res, next) => {
     if (!req.body.name || !req.body.youtube_link) {
@@ -49,6 +48,5 @@ exports.deleteYoutube = (req, res, next) => {
     catch (err) {
         next(err);
     }
-    ;
 };
 //# sourceMappingURL=youtube.js.map

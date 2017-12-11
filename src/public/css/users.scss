@@ -1,0 +1,16 @@
+.user-page-container{
+    table{
+        tbody tr td{
+            font-size: 0.8em !important;
+            // border-right: 1px solid lightgrey;
+            i{
+                font-size: 1.5em;
+                color: #092d3d;
+                &:hover{
+                    cursor: pointer;
+                    color: red;
+                }
+            }
+        }
+    }
+}

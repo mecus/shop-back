@@ -14,12 +14,12 @@ export const getCategory = (req: Request, res: Response, next: NextFunction) => 
     cat.onSnapshot(snapshot => {
         const data: Category[] = snapshot.docs;
         if (data) {
-            res.render("store/category", {params, data, title: "Category"});
+            res.render("store/category", {params, data, title: "Categories"});
         }else {
             dbRef.onSnapshot(snapshot => {
                 const data = snapshot.docs;
                 if (data) {
-                    res.render("store/category", {params, data, title: "Category"});
+                    res.render("store/category", {params, data, title: "Categories"});
                 }
             });
         }

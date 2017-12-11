@@ -64,4 +64,63 @@ const getDashboard = () => {
         }
     }
 };
-//# sourceMappingURL=product-ajax.js.map
+const firebaseLogin = (user) => {
+    // console.log(user.email);
+    const logError = document.getElementById("loginError");
+    firebase.auth().signInWithEmailAndPassword(user.email, user.password)
+        .then((user) => {
+        console.log(user);
+        const data = { uid: user.uid, email: user.email };
+        localStorage.setItem("user", user.uid);
+        // request to tte server with set header
+        try {
+            $.post("/login", data, (res, status) => {
+                console.log(res);
+                console.log(status);
+                location.replace("/dashboard");
+            });
+        }
+        catch (err) {
+            console.log(err);
+        }
+    })
+        .catch((err) => {
+        console.log(err);
+        logError.innerText = `${err.message}`;
+        const loader = document.getElementById("pageLoad");
+        setTimeout(() => {
+            loader.style.display = "none";
+        }, 500);
+    });
+};
+const firebaseSignOut = () => {
+    firebase.auth().signOut()
+        .then(() => {
+        // Sign-out successful.
+        localStorage.removeItem("user");
+        console.log("Firebase Client Successfully Logged out...");
+        $.get("/logout", (status) => {
+            console.log(status);
+            location.replace("/");
+        });
+    }).catch((error) => {
+        // An error happened.
+        console.log(error);
+    });
+};
+const deleteUser = (uid) => {
+    const confirmation = confirm("Are you sure ?");
+    if (confirmation) {
+        $.get("/deleteuser/" + uid, (status) => {
+            if (status.error) {
+                return alert(status.error);
+            }
+            console.log(status);
+            location.replace("/users");
+        });
+    }
+};
+const editUser = (id) => {
+    console.log(id);
+};
+//# sourceMappingURL=request-response-ajax.js.map

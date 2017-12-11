@@ -1,0 +1,59 @@
+extends ../layout
+block content
+	.main-signup-page
+		.container
+			.page-signup-container
+				.card
+					h3 #{title}
+					form(id='signup-form', action="/updateuser" method='POST')
+						input(type='hidden', name='_csrf', value=_csrf)
+						input(name='uid', type="hidden" value=`${user.uid}`)
+						.row
+							.input-field.col.s12
+								label(for='name') Full Name
+								input(type='text', value=user.displayName name='display_name', id='name', autofocus)
+						.row
+							.input-field.col.s6
+								label(for='email') Email
+								input(type='email', value=user.email name='email', id='email')
+							.input-field.col.s6
+									label(for='telephone') Telephone
+									input(type='text', value=user.phoneNumber name='telephone', id='telephone')
+						.row
+							.input-field.col.s6
+								label(for='emailVerified')
+								select(name='emailVerified', id='emailVerified')
+									option(value="" disabled selected) Verify email
+									option(value="") false
+									option(value=`${user.emailVerified}`) true
+								//- input(type='text', value=`${user.emailVerified}` name='emailVerified', id='emailVerified')
+							.input-field.col.s6
+								label(for='adminStatus')
+								select(name='adminStatus', id='adminStatus')
+									option(value="" disabled selected) Select Admin Status
+									option(value="") false
+									option(value="true") true
+						.row
+							.input-field.col.s4
+								label(for='disabled')
+								select(name='disabled', id='disabled')
+									option(value="" disabled selected) Disable User
+									option(value="") false
+									option(value="true") true
+								//- input(type='text', value=`${user.disabled}` )
+							.input-field.col.s4
+								label(for='editor')
+								select(name='editor', id='editor')
+									option(value="" disabled selected) Editor
+									option(value="") false
+									option(value="true") true
+							.input-field.col.s4
+								label(for="gen")
+								select(name="gen", id="gen")
+									option(value="true" disabled selected) General User
+									option(value="") false
+									option(value="true") true
+						.input-field
+							button.waves-effect.waves-light.btn(type='submit' onclick="spinner()")
+								i.material-icons.left person
+								| Update

@@ -1,5 +1,6 @@
 import * as async from "async";
 import * as crypto from "crypto";
+import * as bcrypt from "bcrypt-nodejs";
 import * as nodemailer from "nodemailer";
 import * as passport from "passport";
 import { default as User, UserModel, AuthToken } from "../models/User";
@@ -7,12 +8,8 @@ import { Request, Response, NextFunction } from "express";
 import { LocalStrategyInfo } from "passport-local";
 import { WriteError } from "mongodb";
 const request = require("express-validator");
+import { firebase } from "../config/firebase-config";
 
-
-/**
- * GET /login
- * Login page.
- */
 export let getLogin = (req: Request, res: Response) => {
   if (req.user) {
     return res.redirect("/");
@@ -22,64 +19,83 @@ export let getLogin = (req: Request, res: Response) => {
   });
 };
 
-/**
- * POST /login
- * Sign in using email and password.
- */
 export let postLogin = (req: Request, res: Response, next: NextFunction) => {
-  req.assert("email", "Email is not valid").isEmail();
-  req.assert("password", "Password cannot be blank").notEmpty();
-  req.sanitize("email").normalizeEmail({ gmail_remove_dots: false });
-
-  const errors = req.validationErrors();
-
-  if (errors) {
-    req.flash("errors", errors);
-    return res.redirect("/login");
-  }
-
-  passport.authenticate("local", (err: Error, user: UserModel, info: LocalStrategyInfo) => {
-    if (err) { return next(err); }
-    if (!user) {
-      req.flash("errors", info.message);
-      return res.redirect("/login");
+  const email = req.body.email;
+  const uid = req.body.uid;
+  firebase.auth().getUserByEmail(email)
+  .then((userRecord) => {
+    if (userRecord.customClaims
+      && userRecord.customClaims.admin == true
+      && userRecord.customClaims.editor == true
+      && userRecord.customClaims.general == true) {
+      req.session.admin = userRecord.customClaims.admin;
+      req.session.editor = userRecord.customClaims.editor;
+      req.session.general = userRecord.customClaims.general;
+      req.session.uid = userRecord.uid;
+      req.session.user = userRecord.displayName;
+      req.session.email = userRecord.email;
+      res.status(200).json({status: "Authenticated"});
+    } else
+    if (userRecord.customClaims
+      && userRecord.customClaims.editor == true
+      && userRecord.customClaims.general == true) {
+      // console.log(userRecord.customClaims.admin);
+      // console.log(userRecord.customClaims);
+      // req.session.admin = userRecord.customClaims.admin;
+      req.session.editor = userRecord.customClaims.editor;
+      req.session.general = userRecord.customClaims.general;
+      req.session.uid = userRecord.uid;
+      req.session.user = userRecord.displayName;
+      req.session.email = userRecord.email;
+      res.status(200).json({status: "Authenticated"});
     }
-    req.logIn(user, (err) => {
-      if (err) { return next(err); }
-      req.flash("success", { msg: "Success! You are logged in." });
-      res.redirect(req.session.returnTo || "/");
-    });
-  })(req, res, next);
+    else if (userRecord.customClaims && userRecord.customClaims.general == true) {
+      // console.log("Checking for General");
+      req.session.general = true;
+      req.session.editor = false;
+      req.session.uid = userRecord.uid;
+      req.session.user = userRecord.displayName;
+      req.session.email = userRecord.email;
+      req.session.admin = false;
+      res.status(200).json({status: "Authenticated"});
+    }
+    else {
+      // const user = {uid: userRecord.uid, email: userRecord.email};
+      req.session.general = false;
+      req.session.editor = false;
+      req.session.uid = userRecord.uid;
+      req.session.user = userRecord.displayName;
+      req.session.email = userRecord.email;
+      req.session.admin = false;
+      res.status(200).json({status: "Authenticated"});
+    }
+    // console.log("Successfully fetched user data:", userRecord.toJSON());
+  })
+  .catch((error) => {
+    console.log("Error fetching user data:", error);
+  });
 };
 
-/**
- * GET /logout
- * Log out.
- */
-export let logout = (req: Request, res: Response) => {
-  req.logout();
-  res.redirect("/");
+export let logout = (req: Request, res: Response, next: NextFunction) => {
+  req.session.destroy((err) => {
+    if (err) { next(err); }
+    console.log("Deleting Session");
+    res.status(200).json({status: "Successfully destroy Session"});
+  });
 };
 
-/**
- * GET /signup
- * Signup page.
- */
 export let getSignup = (req: Request, res: Response) => {
   if (req.user) {
-    return res.redirect("/");
+    return res.redirect("/dashboard");
   }
   res.render("account/signup", {
     title: "Create Account"
   });
 };
 
-/**
- * POST /signup
- * Create a new local account.
- */
 export let postSignup = (req: Request, res: Response, next: NextFunction) => {
   req.assert("email", "Email is not valid").isEmail();
+  req.assert("display_name", "Name most not be empty").notEmpty();
   req.assert("password", "Password must be at least 4 characters long").len({ min: 4 });
   req.assert("confirmPassword", "Passwords do not match").equals(req.body.password);
   req.sanitize("email").normalizeEmail({ gmail_remove_dots: false });
@@ -90,29 +106,111 @@ export let postSignup = (req: Request, res: Response, next: NextFunction) => {
     req.flash("errors", errors);
     return res.redirect("/signup");
   }
-
-  const user = new User({
+  firebase.auth().createUser({
     email: req.body.email,
-    password: req.body.password
-  });
-
-  User.findOne({ email: req.body.email }, (err, existingUser) => {
-    if (err) { return next(err); }
-    if (existingUser) {
-      req.flash("errors", { msg: "Account with that email address already exists." });
-      return res.redirect("/signup");
-    }
-    user.save((err) => {
-      if (err) { return next(err); }
-      req.logIn(user, (err) => {
-        if (err) {
-          return next(err);
-        }
-        res.redirect("/");
-      });
+    emailVerified: false,
+    phoneNumber: req.body.telephone, // "+11234597760",
+    password: req.body.password,
+    displayName: req.body.display_name,
+    photoURL: "http://www.example.com/12345678/photo.png",
+    disabled: false
+  })
+    .then((userRecord) => {
+      // See the UserRecord reference doc for the contents of userRecord.
+     setCustomUserClaim(userRecord.uid, {admin: false, editor: false, general: true});
+      res.redirect("/login");
+    })
+    .catch((error) => {
+      console.log("Error creating new user:", error);
     });
+};
+export let getAuthenticatedUsers = (req: Request, res: Response, next: NextFunction) => {
+  firebase.auth().listUsers()
+  .then(listUsers => {
+    const users = listUsers.users;
+    // console.log(listUsers.users);
+    res.render("account/authusers", {users, title: "Authenticated Users"});
+  }).catch(err => {
+    next(err);
   });
 };
+export let getUpdateAuthenticatedUser = (req: Request, res: Response, next: NextFunction) => {
+  const uid = req.params.id;
+  firebase.auth().getUser(uid).then((user) => {
+    // console.log(user);
+    res.render("account/update", {user, title: "Update User"});
+  }).catch((err) => {
+    next(err);
+  });
+};
+export let postUpdateAuthenticatedUser = (req: Request, res: Response, next: NextFunction) => {
+  const uid = req.body.uid;
+  const status = {
+    admin: Boolean(req.body.adminStatus),
+    editor: Boolean(req.body.editor),
+    general: Boolean(req.body.gen)
+  };
+  const user =  {
+    email: req.body.email,
+    phoneNumber: req.body.telephone,
+    emailVerified: Boolean(req.body.emailVerified),
+    // password: req.body.password,
+    displayName: req.body.display_name,
+    photoURL: "http://www.example.com/12345678/photo.png",
+    disabled: Boolean(req.body.disabled),
+  };
+  // console.log(status);
+  firebase.auth().updateUser(uid, user)
+  .then(async(update) => {
+    await setCustomUserClaim(uid, status);
+    await res.redirect("/users");
+  }).catch((err) => {
+    next(err);
+  });
+};
+export let deleteAuthenticatedUsers = (req: Request, res: Response, next: NextFunction) => {
+  const uid = req.params.id;
+  if (req.session.uid == uid) {
+    return res.json({error: "Logged in User can not be deleted"});
+  }
+  firebase.auth().deleteUser(uid)
+  .then(data => {
+    console.log(data);
+    res.json({status: "User Deleted"});
+  }).catch(err => {
+    next(err);
+  });
+};
+
+const setCustomUserClaim = (uid, data) => {
+  return firebase.auth().setCustomUserClaims(uid, {admin: data.admin, editor: data.editor, general: data.general}).then(() => {
+    console.log("Successfully created new user:");
+    }).catch(err => {
+      console.log(err);
+  });
+};
+
+export let getForgot = (req: Request, res: Response) => {
+  if (req.isAuthenticated()) {
+    return res.redirect("/");
+  }
+  res.render("account/forgot", {
+    title: "Forgot Password"
+  });
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /**
  * GET /account
@@ -222,22 +320,9 @@ export let getOauthUnlink = (req: Request, res: Response, next: NextFunction) =>
  * Reset Password page.
  */
 export let getReset = (req: Request, res: Response, next: NextFunction) => {
-  if (req.isAuthenticated()) {
-    return res.redirect("/");
-  }
-  User
-    .findOne({ passwordResetToken: req.params.token })
-    .where("passwordResetExpires").gt(Date.now())
-    .exec((err, user) => {
-      if (err) { return next(err); }
-      if (!user) {
-        req.flash("errors", { msg: "Password reset token is invalid or has expired." });
-        return res.redirect("/forgot");
-      }
-      res.render("account/reset", {
-        title: "Password Reset"
-      });
-    });
+  res.render("account/reset", {
+    title: "Password Reset"
+  });
 };
 
 /**
@@ -306,14 +391,7 @@ export let postReset = (req: Request, res: Response, next: NextFunction) => {
  * GET /forgot
  * Forgot Password page.
  */
-export let getForgot = (req: Request, res: Response) => {
-  if (req.isAuthenticated()) {
-    return res.redirect("/");
-  }
-  res.render("account/forgot", {
-    title: "Forgot Password"
-  });
-};
+
 
 /**
  * POST /forgot
@@ -329,52 +407,51 @@ export let postForgot = (req: Request, res: Response, next: NextFunction) => {
     req.flash("errors", errors);
     return res.redirect("/forgot");
   }
-
-  async.waterfall([
-    function createRandomToken(done: Function) {
-      crypto.randomBytes(16, (err, buf) => {
-        const token = buf.toString("hex");
-        done(err, token);
-      });
-    },
-    function setRandomToken(token: AuthToken, done: Function) {
-      User.findOne({ email: req.body.email }, (err, user: any) => {
-        if (err) { return done(err); }
-        if (!user) {
-          req.flash("errors", { msg: "Account with that email address does not exist." });
-          return res.redirect("/forgot");
-        }
-        user.passwordResetToken = token;
-        user.passwordResetExpires = Date.now() + 3600000; // 1 hour
-        user.save((err: WriteError) => {
-          done(err, token, user);
-        });
-      });
-    },
-    function sendForgotPasswordEmail(token: AuthToken, user: UserModel, done: Function) {
-      const transporter = nodemailer.createTransport({
-        service: "SendGrid",
-        auth: {
-          user: process.env.SENDGRID_USER,
-          pass: process.env.SENDGRID_PASSWORD
-        }
-      });
-      const mailOptions = {
-        to: user.email,
-        from: "hackathon@starter.com",
-        subject: "Reset your password on Hackathon Starter",
-        text: `You are receiving this email because you (or someone else) have requested the reset of the password for your account.\n\n
-          Please click on the following link, or paste this into your browser to complete the process:\n\n
-          http://${req.headers.host}/reset/${token}\n\n
-          If you did not request this, please ignore this email and your password will remain unchanged.\n`
-      };
-      transporter.sendMail(mailOptions, (err) => {
-        req.flash("info", { msg: `An e-mail has been sent to ${user.email} with further instructions.` });
-        done(err);
-      });
-    }
-  ], (err) => {
-    if (err) { return next(err); }
-    res.redirect("/forgot");
-  });
+  // async.waterfall([
+  //   function createRandomToken(done: Function) {
+  //     crypto.randomBytes(16, (err, buf) => {
+  //       const token = buf.toString("hex");
+  //       done(err, token);
+  //     });
+  //   },
+  //   function setRandomToken(token: AuthToken, done: Function) {
+  //     User.findOne({ email: req.body.email }, (err, user: any) => {
+  //       if (err) { return done(err); }
+  //       if (!user) {
+  //         req.flash("errors", { msg: "Account with that email address does not exist." });
+  //         return res.redirect("/forgot");
+  //       }
+  //       user.passwordResetToken = token;
+  //       user.passwordResetExpires = Date.now() + 3600000; // 1 hour
+  //       user.save((err: WriteError) => {
+  //         done(err, token, user);
+  //       });
+  //     });
+  //   },
+  //   function sendForgotPasswordEmail(token: AuthToken, user: UserModel, done: Function) {
+  //     const transporter = nodemailer.createTransport({
+  //       service: "SendGrid",
+  //       auth: {
+  //         user: process.env.SENDGRID_USER,
+  //         pass: process.env.SENDGRID_PASSWORD
+  //       }
+  //     });
+  //     const mailOptions = {
+  //       to: user.email,
+  //       from: "hackathon@starter.com",
+  //       subject: "Reset your password on Hackathon Starter",
+  //       text: `You are receiving this email because you (or someone else) have requested the reset of the password for your account.\n\n
+  //         Please click on the following link, or paste this into your browser to complete the process:\n\n
+  //         http://${req.headers.host}/reset/${token}\n\n
+  //         If you did not request this, please ignore this email and your password will remain unchanged.\n`
+  //     };
+  //     transporter.sendMail(mailOptions, (err) => {
+  //       req.flash("info", { msg: `An e-mail has been sent to ${user.email} with further instructions.` });
+  //       done(err);
+  //     });
+  //   }
+  // ], (err) => {
+  //   if (err) { return next(err); }
+  //   res.redirect("/forgot");
+  // });
 };

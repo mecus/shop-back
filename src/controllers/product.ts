@@ -15,7 +15,7 @@ export const getProducts = (req: Request, res: Response, next: NextFunction) => 
             const products = snapshot.docs;
 
             if (snapshot) {
-                res.render("store/products/products", {products, title: "Products"});
+                res.status(200).render("store/products/products", {products, title: "Products"});
             }else {
                 res.render("store/products/products", {title: "Products"});
             }
@@ -194,4 +194,20 @@ export const deleteProduct = (req: Request, res: Response) => {
         return res.json({status: "Deleted", id: paramId});
     };
     removeProduct();
+};
+
+export const getApiProducts = (req: Request, res: Response, next: NextFunction) => {
+    try {
+        productRef.get().then(snapshot => {
+            const products = snapshot.docs;
+            // console.log(products);
+            res.status(200).json(products);
+        }).catch(err => {
+            console.log(err);
+        });
+    }
+    catch (err) {
+        res.status(500);
+        next(err);
+    }
 };

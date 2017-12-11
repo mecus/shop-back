@@ -12,8 +12,9 @@ import * as path from "path";
 import * as mongoose from "mongoose";
 import * as passport from "passport";
 import expressValidator = require("express-validator");
+const FirebaseStore = require('connect-session-firebase')(session);
 
-const MongoStore = mongo(session);
+// const MongoStore = mongo(session);
 
 /**
  * Load environment variables from .env file, where API keys and passwords are configured.
@@ -24,6 +25,7 @@ dotenv.config({ path: ".env" });
  * API keys and Passport configuration.
  */
 import * as passportConfig from "./config/passport";
+import { firebase, authenticate } from "./config/firebase-config";
 
 /**
  * Controllers (route handlers).
@@ -35,31 +37,14 @@ import * as contactController from "./controllers/contact";
 import { getDepartment, postDepartment, removeDepartment, uploadImage } from "./controllers/department";
 import { getAisle, postAisle, removeAisle, getAsileJson } from "./controllers/aisle";
 import { getCategory, postCategory, removeCategory } from "./controllers/category";
-import { getProducts, postProduct, newProduct, editProduct, showProduct, deleteProduct, updateProduct } from "./controllers/product";
+import { getProducts, postProduct, newProduct, editProduct, showProduct, deleteProduct, updateProduct, getApiProducts } from "./controllers/product";
 import { selectDepartment, selectAisle, selectCategory } from "./controllers/selections";
 import { getAdverts, postAdvert, deleteAdvert, editAdvert, updateAdvert } from "./controllers/adverts";
 import { getOrders } from "./controllers/orders";
 import { getYoutube, postYoutube, deleteYoutube } from "./controllers/youtube";
 
 
-
-
-/**
- * Create Express server.
- */
 const app = express();
-
-/**
- * Connect to MongoDB.
- */
-// mongoose.Promise = global.Promise;
-// mongoose.connect(process.env.MONGODB_URI || process.env.MONGOLAB_URI);
-
-// mongoose.connection.on("error", () => {
-//   console.log("MongoDB connection error. Please make sure MongoDB is running.");
-//   process.exit();
-// });
-
 /**
  * Express configuration.
  */
@@ -82,84 +67,91 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(expressValidator());
 app.use(session({
-  resave: true,
-  saveUninitialized: true,
+  store: new FirebaseStore({
+    database: firebase.database()
+  }),
   secret: process.env.SESSION_SECRET,
-  // store: new MongoStore({
-  //   url: process.env.MONGODB_URI || process.env.MONGOLAB_URI,
-  //   autoReconnect: true
-  // })
+  resave: true,
+  saveUninitialized: true
 }));
-app.use(passport.initialize());
-app.use(passport.session());
+// app.use(passport.initialize());
+// app.use(passport.session());
 app.use(flash());
 app.use(lusca.xframe("SAMEORIGIN"));
 app.use(lusca.xssProtection(true));
-app.use((req, res, next) => {
-  // res.locals.user = req.user;
-  next();
-});
-app.use((req, res, next) => {
-  // After successful login, redirect back to the intended page
-  // if (!req.user &&
-  //     req.path !== "/login" &&
-  //     req.path !== "/signup" &&
-  //     !req.path.match(/^\/auth/) &&
-  //     !req.path.match(/\./)) {
-  //   req.session.returnTo = req.path;
-  // } else if (req.user &&
-  //     req.path == "/account") {
-  //   req.session.returnTo = req.path;
-  // }
-  next();
-});
-
+// app.use((req, res, next) => {
+//   // res.locals.user = req.user;
+//   console.log("Request Set:", req.session);
+//   next();
+// });
 app.use(express.static(path.join(__dirname, "public")));
 
 /**
  * Primary app routes.
  */
+app.use((req, res, next) => {
+  if (req.session.uid) {
+    res.locals.uid = req.session.uid;
+    res.locals.user = req.session.user;
+    res.locals.email = req.session.email;
+    res.locals.admin = req.session.admin;
+    res.locals.editor = req.session.editor;
+    res.locals.general = req.session.general;
+    next();
+  } else {
+    next();
+  }
+});
+// app.get("/", (req, res, next) => {
+//  res.redirect("/login");
+// });
 app.get("/", homeController.index);
-app.get("/department", getDepartment);
-app.post("/department", postDepartment);
-app.delete("/department/:id", removeDepartment);
-app.get("/aisle/:id", getAisle);
-app.post("/aisle", postAisle);
-app.delete("/aisle/:id", removeAisle);
-app.get("/category/?", getCategory);
-app.post("/category", postCategory);
-app.delete("/category/:id", removeCategory);
-app.post("/upload", uploadImage);
+app.get("/dashboard", authenticate, homeController.dashboard);
+app.get("/department", authenticate, getDepartment);
+app.post("/department", authenticate, postDepartment);
+app.delete("/department/:id", authenticate, removeDepartment);
+app.get("/aisle/:id", authenticate, getAisle);
+app.post("/aisle", authenticate, postAisle);
+app.delete("/aisle/:id", authenticate, removeAisle);
+app.get("/category/?", authenticate, getCategory);
+app.post("/category", authenticate, postCategory);
+app.delete("/category/:id", authenticate, removeCategory);
+app.post("/upload", authenticate, uploadImage);
 
-app.get("/products", getProducts);
-app.get("/product/new/:id", newProduct);
-app.get("/product/edit/:id", editProduct);
-app.get("/products/show/:id", showProduct);
-app.post("/products/new", postProduct);
-app.post("/products/updates", updateProduct);
-app.post("/product/delete", deleteProduct);
+app.get("/products", authenticate, getProducts);
+app.get("/product/new/:id", authenticate, newProduct);
+app.get("/product/edit/:id", authenticate, editProduct);
+app.get("/products/show/:id", authenticate, showProduct);
+app.post("/products/new", authenticate, postProduct);
+app.post("/products/updates", authenticate, updateProduct);
+app.post("/product/delete", authenticate, deleteProduct);
 
 // Adverts Routes
-app.get("/adverts", getAdverts);
-app.post("/adverts", postAdvert);
-app.get("/adverts/:id", deleteAdvert);
-app.get("/edit_advert/:id", editAdvert);
-app.post("/update_advert", updateAdvert);
+app.get("/adverts", authenticate, getAdverts);
+app.post("/adverts", authenticate, postAdvert);
+app.get("/adverts/:id", authenticate, deleteAdvert);
+app.get("/edit_advert/:id", authenticate, editAdvert);
+app.post("/update_advert", authenticate, updateAdvert);
 
 // Making Selections for product insert
-app.get("/departments", selectDepartment);
-app.get("/aisles/:id", selectAisle);
-app.get("/categories/:id", selectCategory);
+app.get("/departments", authenticate, selectDepartment);
+app.get("/aisles/:id", authenticate, selectAisle);
+app.get("/categories/:id", authenticate, selectCategory);
 
 // Orders
-app.get("/orders", getOrders);
+app.get("/orders", authenticate, getOrders);
 
 // Youtube Video
-app.get("/youtube", getYoutube);
-app.post("/youtube/add", postYoutube);
-app.get("/youtube/:id", deleteYoutube);
+app.get("/youtube", authenticate, getYoutube);
+app.post("/youtube/add", authenticate, postYoutube);
+app.get("/youtube/:id", authenticate, deleteYoutube);
 
-app.get("/login", userController.getLogin);
+app.get("/login", (req, res, next) => {
+  if (req.session && req.session.uid) {
+    return res.redirect("/dashboard");
+  }
+  next();
+}, userController.getLogin);
 app.post("/login", userController.postLogin);
 app.get("/logout", userController.logout);
 app.get("/forgot", userController.getForgot);
@@ -168,6 +160,10 @@ app.get("/reset/:token", userController.getReset);
 app.post("/reset/:token", userController.postReset);
 app.get("/signup", userController.getSignup);
 app.post("/signup", userController.postSignup);
+app.get("/users", authenticate, userController.getAuthenticatedUsers);
+app.get("/deleteuser/:id", authenticate, userController.deleteAuthenticatedUsers);
+app.get("/updateuser/:id", authenticate, userController.getUpdateAuthenticatedUser);
+app.post("/updateuser", authenticate, userController.postUpdateAuthenticatedUser);
 app.get("/contact", contactController.getContact);
 app.post("/contact", contactController.postContact);
 app.get("/account", passportConfig.isAuthenticated, userController.getAccount);
@@ -180,6 +176,7 @@ app.get("/account/unlink/:provider", passportConfig.isAuthenticated, userControl
  * API examples routes.
  */
 app.get("/api/aisle", getAsileJson);
+app.get("/api/products", authenticate, getApiProducts);
 app.get("/api", apiController.getApi);
 app.get("/api/facebook", passportConfig.isAuthenticated, passportConfig.isAuthorized, apiController.getFacebook);
 
@@ -214,6 +211,7 @@ app.use((err, req, res, next) => {
 
   res.render('500', { title: "Something Went Terribly Wrong!", error: err.stack });
 });
+
 
 /**
  * Error Handler. Provides full stack - remove for production

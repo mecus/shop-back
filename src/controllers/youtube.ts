@@ -17,7 +17,7 @@ export const getYoutube = (req: Request, res: Response, next: NextFunction) => {
         });
     } catch (err) {
         next(err);
-    };
+    }
 };
 export const postYoutube = (req: Request, res: Response, next: NextFunction) => {
     if (!req.body.name || !req.body.youtube_link) {
@@ -42,8 +42,8 @@ export const deleteYoutube = (req: Request, res: Response, next: NextFunction) =
             res.redirect("/youtube");
         }).catch(err => {
             next(err);
-        })
+        });
     } catch (err) {
         next(err);
-    };
+    }
 };

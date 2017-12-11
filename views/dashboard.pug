@@ -1,0 +1,40 @@
+extends layout
+block content
+  .page-container-home
+    .page-overlay
+      .container
+        .row1-items
+          .item1.card
+            .item1-inner.valign-wrapper
+              h1.center-align#productLength(href="/products")
+              p.center-align Products
+          .item2.card
+            .item2-inner
+              table
+                thead
+                  tr
+                    td Store Management
+                    td 
+                    td
+                tbody
+                  tr
+                    td Departments
+                    td
+                    td#deptList 0
+                  tr
+                    td Aisles
+                    td
+                    td#aisleList 0
+                  tr
+                    td Categories
+                    td
+                    td#catleList 0
+          .item3.card
+            .item3-inner.valign-wrapper
+              p.center-align Orders
+              h1.center-align 56
+        .row2-items
+          .item1.card
+          .item2.card
+          .item3.card
+          .item4.card

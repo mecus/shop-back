@@ -164,9 +164,61 @@
   width: 600px;
   margin: 0 auto; }
 
-.page-header {
-  width: 700px;
-  margin: 0 auto; }
+.main-page-container {
+  background-color: #092d3d;
+  height: 100vh;
+  margin: 0px;
+  padding: 0px;
+  padding-top: 150px; }
+  .main-page-container .page-header {
+    width: 500px;
+    margin: 0 auto;
+    box-shadow: 1px 1px 5px 5px greenyellow;
+    padding: 2px; }
+    .main-page-container .page-header .card {
+      margin: 0px;
+      padding: 10px;
+      background-color: #092d3d;
+      color: #ffffff; }
+      .main-page-container .page-header .card h3 {
+        font-size: 2em; }
+      .main-page-container .page-header .card button {
+        background-color: #092d3d !important; }
+
+.main-signup-page {
+  background-color: #092d3d;
+  height: 100vh;
+  margin: 0px;
+  padding: 0px;
+  padding-top: 100px; }
+  .main-signup-page .page-signup-container {
+    width: 500px;
+    margin: 0 auto;
+    box-shadow: 1px 1px 5px 5px #ef9339;
+    padding: 2px; }
+    .main-signup-page .page-signup-container .card {
+      margin: 0px;
+      padding: 10px;
+      background-color: #092d3d;
+      color: #ffffff; }
+      .main-signup-page .page-signup-container .card h3 {
+        font-size: 2em; }
+      .main-signup-page .page-signup-container .card button {
+        background-color: #092d3d !important; }
+
+.forgot-form-container {
+  width: 500px;
+  margin: 0 auto;
+  margin-top: 40px; }
+
+.user-page-container table tbody tr td {
+  font-size: 0.8em !important; }
+  .user-page-container table tbody tr td i {
+    font-size: 1.5em;
+    color: #092d3d; }
+    .user-page-container table tbody tr td i:hover {
+      cursor: pointer;
+      color: red; }
 
 #pageLoad {
   display: none;
@@ -222,6 +274,117 @@ textarea {
 
 nav {
   margin: 0px;
-  background-color: #ffffff !important; }
+  background-color: #092d3d !important; }
   nav a {
     color: lightslategrey !important; }
+
+.page-container-home {
+  background-color: #092d3d; }
+  .page-container-home .page-overlay {
+    background-color: rgba(0, 0, 0, 0.2);
+    margin: 0px;
+    padding: 0px;
+    height: 100vh;
+    padding-top: 20px;
+    padding-bottom: 40px; }
+    .page-container-home .page-overlay h1 {
+      margin: 0px;
+      padding: 0px; }
+    .page-container-home .page-overlay .row1-items {
+      width: 1100px;
+      display: flex;
+      -webkit-display: flex;
+      flex-wrap: nowrap;
+      margin-bottom: 5px; }
+      .page-container-home .page-overlay .row1-items .item1, .page-container-home .page-overlay .row1-items .item2, .page-container-home .page-overlay .row1-items .item3 {
+        background-color: #092d3d;
+        width: 400px;
+        height: 300px;
+        margin-bottom: 0px !important; }
+      .page-container-home .page-overlay .row1-items .item1 {
+        margin-right: 5px;
+        text-align: center; }
+        .page-container-home .page-overlay .row1-items .item1 .item1-inner {
+          margin: 0 auto;
+          margin-top: 50px;
+          width: 200px;
+          height: 200px;
+          border: 5px solid #59859b;
+          border-radius: 50%; }
+          .page-container-home .page-overlay .row1-items .item1 .item1-inner h1 {
+            font-size: 2em;
+            margin-left: 25%;
+            color: #59859b; }
+          .page-container-home .page-overlay .row1-items .item1 .item1-inner p {
+            color: #59859b; }
+          .page-container-home .page-overlay .row1-items .item1 .item1-inner:hover {
+            border: 5px solid greenyellow;
+            cursor: pointer; }
+            .page-container-home .page-overlay .row1-items .item1 .item1-inner:hover h1 {
+              font-size: 2em;
+              margin-left: 25%;
+              color: greenyellow; }
+            .page-container-home .page-overlay .row1-items .item1 .item1-inner:hover p {
+              color: greenyellow; }
+      .page-container-home .page-overlay .row1-items .item2 {
+        color: #59859b; }
+        .page-container-home .page-overlay .row1-items .item2:hover table tbody tr {
+          color: greenyellow; }
+      .page-container-home .page-overlay .row1-items .item3 {
+        margin-left: 5px; }
+        .page-container-home .page-overlay .row1-items .item3 .item3-inner {
+          color: #59859b;
+          width: 200px;
+          height: 200px;
+          margin: 0 auto;
+          margin-top: 50px;
+          text-align: center;
+          border: 5px solid #59859b;
+          border-radius: 50%; }
+          .page-container-home .page-overlay .row1-items .item3 .item3-inner h1 {
+            font-size: 3em;
+            text-align: center; }
+          .page-container-home .page-overlay .row1-items .item3 .item3-inner p {
+            margin-left: 20%;
+            font-size: 1.5em; }
+          .page-container-home .page-overlay .row1-items .item3 .item3-inner:hover {
+            cursor: pointer;
+            border-color: greenyellow; }
+            .page-container-home .page-overlay .row1-items .item3 .item3-inner:hover h1, .page-container-home .page-overlay .row1-items .item3 .item3-inner:hover p {
+              color: greenyellow; }
+    .page-container-home .page-overlay .row2-items {
+      width: 1100px;
+      display: flex; }
+      .page-container-home .page-overlay .row2-items .item1, .page-container-home .page-overlay .row2-items .item2, .page-container-home .page-overlay .row2-items .item3, .page-container-home .page-overlay .row2-items .item4 {
+        background-color: #092d3d;
+        width: 300px;
+        height: 250px; }
+      .page-container-home .page-overlay .row2-items .item1 {
+        margin-right: 5px; }
+      .page-container-home .page-overlay .row2-items .item3 {
+        margin-left: 5px; }
+      .page-container-home .page-overlay .row2-items .item4 {
+        margin-left: 5px; }
+    .page-container-home .page-overlay .page-content {
+      width: 500px;
+      margin: 0 auto;
+      margin-top: 15%;
+      text-align: center; }
+      .page-container-home .page-overlay .page-content h1, .page-container-home .page-overlay .page-content p, .page-container-home .page-overlay .page-content a {
+        text-align: center;
+        color: #59859b; }
+      .page-container-home .page-overlay .page-content a i {
+        font-size: 2em; }
+        .page-container-home .page-overlay .page-content a i:hover {
+          cursor: pointer;
+          color: greenyellow; }
+      .page-container-home .page-overlay .page-content i {
+        color: #59859b; }
+      .page-container-home .page-overlay .page-content #home-arrow {
+        margin-top: 0px;
+        transition: 1s;
+        font-size: 1.5em;
+        color: #ffffff; }
+        .page-container-home .page-overlay .page-content #home-arrow:hover {
+          cursor: pointer;
+          color: #ef9339; }

@@ -16,10 +16,11 @@ html
     link(rel='stylesheet', href='https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css')
 
   body
-    include partials/header
+    - if (general)
+      include partials/header
 
     .container-page
-      include partials/flash
+      //- include partials/flash
       block content
       #pageLoad
         .loader-spinner
@@ -41,25 +42,48 @@ html
     script(src='/js/image-uploader.js')
     script(src="/js/main.js")
     script(src="/js/javascript.js")
-    script(src="/js/product-ajax.js")
+    script(src="/js/request-response-ajax.js")
     script.
       $(document).ready(function() {
         $('select').material_select();
       });
       $('.carousel.carousel-slider').carousel({fullWidth: true});
-    script(src='https://www.gstatic.com/firebasejs/4.6.1/firebase.js')
+    //- script(src="https://www.gstatic.com/firebasejs/4.7.0/firebase.js")
+    script(src="https://www.gstatic.com/firebasejs/4.6.0/firebase.js")
+    script(src="https://www.gstatic.com/firebasejs/4.6.0/firebase-firestore.js")
     script.
-      // Initialize Firebase
-      //- $(document).ready(function(){
-      //-   var config = {
-      //-   apiKey: "AIzaSyC3PouxaTBLmR1R2YhHKTR9dldzLGhCXwA",
-      //-   authDomain: "shop-5e89b.firebaseapp.com",
-      //-   databaseURL: "https://shop-5e89b.firebaseio.com",
-      //-   projectId: "shop-5e89b",
-      //-   storageBucket: "shop-5e89b.appspot.com",
-      //-   messagingSenderId: "777977280371"
-      //-   };
-      //-   firebase.initializeApp(config);
-      //- })
-          
+      //- const config = {
+      //-         apiKey: "AIzaSyC3PouxaTBLmR1R2YhHKTR9dldzLGhCXwA",
+      //-         authDomain: "shop-5e89b.firebaseapp.com",
+      //-         databaseURL: "https://shop-5e89b.firebaseio.com",
+      //-         projectId: "shop-5e89b",
+      //-         storageBucket: "shop-5e89b.appspot.com",
+      //-         messagingSenderId: "777977280371"
+      //-       };
+      //-       firebase.initializeApp(config);
+      //- $(document).ready(function() {
+      //-   const config = {
+      //-       apiKey: "AIzaSyC3PouxaTBLmR1R2YhHKTR9dldzLGhCXwA",
+      //-       authDomain: "shop-5e89b.firebaseapp.com",
+      //-       databaseURL: "https://shop-5e89b.firebaseio.com",
+      //-       projectId: "shop-5e89b",
+      //-       storageBucket: "shop-5e89b.appspot.com",
+      //-       messagingSenderId: "777977280371"
+      //-     };
+      //-     firebase.initializeApp(config);
+      //-   //-   const db = firebase.firestore();
+      //-   //-   try {
+      //-   //-    const dept = db.collection("departments").get()
+      //-   //-    .then(snap => {
+      //-   //-        console.log(snap);
+      //-   //-    }).catch(err => {
+      //-   //-        console.log(err);
+      //-   //-    })
+      //-   //- } catch (err) {
+      //-   //-     console.log(err);
+      //-   //- }
+      //- });
+
+
+                
 
