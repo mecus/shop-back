@@ -1,2 +1,14 @@
 node_modules
 npm-debug.log
+dockers
+temp
+test
+src
+startup.sh
+copyStaticAssets.js
+README.md
+urgy-service.yml
+urgydeployment.yml
+tslint.json
+tsconfing.json
+Dockerfile

@@ -4,7 +4,7 @@ const admin = require("firebase-admin");
 const serviceAccount = require("../../firebase-adminsdk.json");
 exports.firebase = admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
-    databaseURL: "https://shop-5e89b.firebaseio.com"
+    databaseURL: "https://urgy-a513c.firebaseio.com"
     // databaseAuthVariableOverride: undefined
 });
 exports.authenticate = (req, res, next) => {
@@ -12,6 +12,72 @@ exports.authenticate = (req, res, next) => {
         return res.redirect("/login");
     }
     next();
+};
+exports.isAuthorized = (req, res, next) => {
+    if (!req.session.admin) {
+        res.render("access", { title: "Access Deniel", content: "You are not authorized here!" });
+    }
+    next();
+};
+exports.setLocalSession = (req, res, next) => {
+    if (req.session.uid) {
+        res.locals.uid = req.session.uid;
+        res.locals.user = req.session.user;
+        res.locals.email = req.session.email;
+        res.locals.admin = req.session.admin;
+        res.locals.editor = req.session.editor;
+        res.locals.general = req.session.general;
+        next();
+    }
+    else {
+        next();
+    }
+};
+exports.setUserSession = (req, userRecord) => {
+    if (userRecord.customClaims
+        && userRecord.customClaims.admin == true
+        && userRecord.customClaims.editor == true
+        && userRecord.customClaims.general == true) {
+        req.session.admin = userRecord.customClaims.admin;
+        req.session.editor = userRecord.customClaims.editor;
+        req.session.general = userRecord.customClaims.general;
+        req.session.uid = userRecord.uid;
+        req.session.user = userRecord.displayName;
+        req.session.email = userRecord.email;
+    }
+    else if (userRecord.customClaims
+        && userRecord.customClaims.editor == true
+        && userRecord.customClaims.general == true) {
+        // console.log(userRecord.customClaims.admin);
+        // console.log(userRecord.customClaims);
+        // req.session.admin = userRecord.customClaims.admin;
+        req.session.editor = userRecord.customClaims.editor;
+        req.session.general = userRecord.customClaims.general;
+        req.session.uid = userRecord.uid;
+        req.session.user = userRecord.displayName;
+        req.session.email = userRecord.email;
+        // res.status(200).json({status: "Authenticated"});
+    }
+    else if (userRecord.customClaims && userRecord.customClaims.general == true) {
+        // console.log("Checking for General");
+        req.session.general = true;
+        req.session.editor = false;
+        req.session.uid = userRecord.uid;
+        req.session.user = userRecord.displayName;
+        req.session.email = userRecord.email;
+        req.session.admin = false;
+        // res.status(200).json({status: "Authenticated"});
+    }
+    else {
+        // const user = {uid: userRecord.uid, email: userRecord.email};
+        req.session.general = false;
+        req.session.editor = false;
+        req.session.uid = userRecord.uid;
+        req.session.user = userRecord.displayName;
+        req.session.email = userRecord.email;
+        req.session.admin = false;
+        // res.status(200).json({status: "Authenticated"});
+    }
 };
 // const config = {
 //     apiKey: "AIzaSyC3PouxaTBLmR1R2YhHKTR9dldzLGhCXwA",

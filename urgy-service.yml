@@ -1,0 +1,16 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: urgyappservice
+spec:
+  selector:
+    app: urgyapp
+  ports:
+    - protocol: "TCP"
+      # Port accessible inside cluster
+      port: 3004
+      # Port to forward to inside the pod
+      targetPort: 8080
+      # Port accessible outside cluster
+      nodePort: 30002
+  type: LoadBalancer

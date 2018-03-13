@@ -5,7 +5,7 @@ export interface IDepartment {
     feature_image: string;
     group: string;
     image_url: string;
-    photo_id: string;
+
 }
 
 export type Department = IDepartment;

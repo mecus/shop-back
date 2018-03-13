@@ -1,0 +1,17 @@
+
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: urgydeployment
+spec:
+  replicas: 5
+  template:
+    metadata:
+      labels:
+        app: urgyapp
+    spec:
+      containers:
+        - name: urgyapp
+          image: mecus/urgyserver:v1.0.1
+          ports:
+            - containerPort: 8080
